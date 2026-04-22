@@ -448,6 +448,14 @@ TRIAL_LANG_MAP = {
 TRIAL_DIR = os.path.join(BASE_DIR, 'data', 'trial')
 os.makedirs(TRIAL_DIR, exist_ok=True)
 
+# Clear old trial cache on startup — ensures fresh voice after any code changes
+for _old_trial in os.listdir(TRIAL_DIR):
+    if _old_trial.endswith('.mp3'):
+        try:
+            os.remove(os.path.join(TRIAL_DIR, _old_trial))
+        except:
+            pass
+
 
 @app.route("/api/trial", methods=["POST"])
 def api_trial_voice():
