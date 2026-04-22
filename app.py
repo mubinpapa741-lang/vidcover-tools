@@ -226,30 +226,12 @@ def _prepare_text(text, voice_key):
     return processed.strip()
 
 
-# Per-voice pitch adjustments for more natural/pleasant tone (Hz format for edge-tts)
-VOICE_PITCH = {
-    'bn-female': '+10Hz',   # Slightly warmer Bangla female
-    'bn-male': '+0Hz',      # Natural male
-    'en-female': '+5Hz',    # Warm US female
-    'en-male': '+0Hz',      # Confident US male
-    'en-uk-female': '+5Hz',
-    'en-uk-male': '+0Hz',
-    'en-au-female': '+5Hz',
-    'en-au-male': '+0Hz',
-    'en-in-female': '+5Hz',
-    'en-in-male': '+0Hz',
-    'hi-female': '+10Hz',   # Warmer Hindi female
-    'hi-male': '+0Hz',
-}
-
-
 async def _generate_tts(text, voice_name, rate, filepath, voice_key=''):
-    """Async helper to generate TTS with edge-tts. Plain text with native rate/pitch."""
+    """Async helper to generate TTS with edge-tts."""
     # Preprocess text for better pronunciation
     clean_text = _prepare_text(text, voice_key)
-    pitch = VOICE_PITCH.get(voice_key, '+0Hz')
     
-    communicate = edge_tts.Communicate(text=clean_text, voice=voice_name, rate=rate, pitch=pitch)
+    communicate = edge_tts.Communicate(text=clean_text, voice=voice_name, rate=rate)
     await communicate.save(filepath)
 
 
