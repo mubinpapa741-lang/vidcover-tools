@@ -243,46 +243,14 @@ VOICE_PITCH = {
 }
 
 
-def _prepare_ssml(text, voice_name, rate, pitch='+0%'):
-    """Convert plain text to SSML for better pronunciation and natural speech."""
-    processed = text.strip()
-    # Add natural pauses at sentence boundaries (Bangla । and English .!?)
-    processed = re.sub(r'([।.!?])', r'\1<break time="350ms"/>', processed)
-    # Add small pauses after commas
-    processed = re.sub(r'([,，])', r'\1<break time="180ms"/>', processed)
-    # Add pauses after colons and semicolons
-    processed = re.sub(r'([;:])', r'\1<break time="250ms"/>', processed)
-    
-    # Detect language for xml:lang
-    has_bangla = bool(re.search(r'[\u0980-\u09FF]', text))
-    has_hindi = bool(re.search(r'[\u0900-\u097F]', text))
-    lang = 'bn-BD' if has_bangla else ('hi-IN' if has_hindi else 'en-US')
-    
-    ssml = f"""<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='{lang}'>
-    <voice name='{voice_name}'>
-        <prosody rate='{rate}' pitch='{pitch}'>
-            {processed}
-        </prosody>
-    </voice>
-</speak>"""
-    return ssml
-
-
 async def _generate_tts(text, voice_name, rate, filepath, voice_key=''):
-    """Async helper to generate TTS with edge-tts. Uses SSML for better quality."""
+    """Async helper to generate TTS with edge-tts. Plain text with native rate/pitch."""
     # Preprocess text for better pronunciation
     clean_text = _prepare_text(text, voice_key)
     pitch = VOICE_PITCH.get(voice_key, '+0%')
     
-    try:
-        # Try SSML first for better quality
-        ssml = _prepare_ssml(clean_text, voice_name, rate, pitch)
-        communicate = edge_tts.Communicate(text=ssml, voice=voice_name)
-        await communicate.save(filepath)
-    except Exception:
-        # Fallback to plain text if SSML fails
-        communicate = edge_tts.Communicate(text=clean_text, voice=voice_name, rate=rate)
-        await communicate.save(filepath)
+    communicate = edge_tts.Communicate(text=clean_text, voice=voice_name, rate=rate, pitch=pitch)
+    await communicate.save(filepath)
 
 
 def _split_text_for_duo(text):
