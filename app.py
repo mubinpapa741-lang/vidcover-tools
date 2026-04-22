@@ -187,20 +187,80 @@ def _count_words(text):
     return len(words)
 
 
-def _prepare_ssml(text, voice_name, rate):
-    """Convert plain text to SSML for better pronunciation and natural speech."""
-    # Add natural pauses at sentence boundaries
+def _prepare_text(text, voice_key):
+    """Preprocess text for better pronunciation across all languages."""
     processed = text.strip()
-    # Add breaks after sentence-ending punctuation
-    processed = re.sub(r'([।\.\!\?])', r'\1<break time="400ms"/>', processed)
-    # Add small pauses after commas
-    processed = re.sub(r'([,，])', r'\1<break time="200ms"/>', processed)
-    # Add pauses after colons and semicolons
-    processed = re.sub(r'([;:])', r'\1<break time="300ms"/>', processed)
     
-    ssml = f"""<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='bn-BD'>
+    # === BANGLA SPECIFIC FIXES ===
+    if voice_key.startswith('bn') or voice_key == 'bn-mixed':
+        # Fix common Bangla number pronunciation
+        bn_digits = {'0': 'শূন্য', '1': 'এক', '2': 'দুই', '3': 'তিন', '4': 'চার', '5': 'পাঁচ', 
+                     '6': 'ছয়', '7': 'সাত', '8': 'আট', '9': 'নয়'}
+        # Convert standalone digits to Bangla words
+        def replace_number(match):
+            num = match.group(0)
+            if len(num) <= 4:  # Only convert small numbers
+                return ' '.join(bn_digits.get(d, d) for d in num)
+            return num
+        processed = re.sub(r'\b\d{1,4}\b', replace_number, processed)
+        
+        # Fix percentage signs
+        processed = processed.replace('%', ' পারসেন্ট')
+        
+        # Add natural pauses around dashes and colons in Bangla
+        processed = re.sub(r'\s*[\u2014\u2013-]\s*', ', ', processed)
+        
+    # === HINDI SPECIFIC FIXES ===  
+    elif voice_key.startswith('hi'):
+        processed = processed.replace('%', ' प्रतिशत')
+        processed = re.sub(r'\s*[\u2014\u2013-]\s*', ', ', processed)
+    
+    # === ALL LANGUAGES: General fixes ===
+    # Remove excessive spaces
+    processed = re.sub(r'\s{2,}', ' ', processed)
+    # Ensure proper sentence endings have spaces
+    processed = re.sub(r'([।.!?])([^\s])', r'\1 \2', processed)
+    # Remove zero-width chars that mess up pronunciation
+    processed = re.sub(r'[\u200b\u200c\u200d\ufeff]', '', processed)
+    
+    return processed.strip()
+
+
+# Per-voice pitch adjustments for more natural/pleasant tone
+VOICE_PITCH = {
+    'bn-female': '+3%',   # Slightly higher = warmer Bangla female
+    'bn-male': '+0%',     # Natural male
+    'en-female': '+2%',   # Warm US female
+    'en-male': '+0%',     # Confident US male
+    'en-uk-female': '+2%',
+    'en-uk-male': '+0%',
+    'en-au-female': '+1%',
+    'en-au-male': '+0%',
+    'en-in-female': '+2%',
+    'en-in-male': '+0%',
+    'hi-female': '+3%',   # Warmer Hindi female
+    'hi-male': '+0%',
+}
+
+
+def _prepare_ssml(text, voice_name, rate, pitch='+0%'):
+    """Convert plain text to SSML for better pronunciation and natural speech."""
+    processed = text.strip()
+    # Add natural pauses at sentence boundaries (Bangla । and English .!?)
+    processed = re.sub(r'([।.!?])', r'\1<break time="350ms"/>', processed)
+    # Add small pauses after commas
+    processed = re.sub(r'([,，])', r'\1<break time="180ms"/>', processed)
+    # Add pauses after colons and semicolons
+    processed = re.sub(r'([;:])', r'\1<break time="250ms"/>', processed)
+    
+    # Detect language for xml:lang
+    has_bangla = bool(re.search(r'[\u0980-\u09FF]', text))
+    has_hindi = bool(re.search(r'[\u0900-\u097F]', text))
+    lang = 'bn-BD' if has_bangla else ('hi-IN' if has_hindi else 'en-US')
+    
+    ssml = f"""<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='{lang}'>
     <voice name='{voice_name}'>
-        <prosody rate='{rate}' pitch='+2%'>
+        <prosody rate='{rate}' pitch='{pitch}'>
             {processed}
         </prosody>
     </voice>
@@ -208,10 +268,21 @@ def _prepare_ssml(text, voice_name, rate):
     return ssml
 
 
-async def _generate_tts(text, voice_name, rate, filepath):
-    """Async helper to generate TTS with edge-tts."""
-    communicate = edge_tts.Communicate(text=text, voice=voice_name, rate=rate)
-    await communicate.save(filepath)
+async def _generate_tts(text, voice_name, rate, filepath, voice_key=''):
+    """Async helper to generate TTS with edge-tts. Uses SSML for better quality."""
+    # Preprocess text for better pronunciation
+    clean_text = _prepare_text(text, voice_key)
+    pitch = VOICE_PITCH.get(voice_key, '+0%')
+    
+    try:
+        # Try SSML first for better quality
+        ssml = _prepare_ssml(clean_text, voice_name, rate, pitch)
+        communicate = edge_tts.Communicate(text=ssml, voice=voice_name)
+        await communicate.save(filepath)
+    except Exception:
+        # Fallback to plain text if SSML fails
+        communicate = edge_tts.Communicate(text=clean_text, voice=voice_name, rate=rate)
+        await communicate.save(filepath)
 
 
 def _split_text_for_duo(text):
@@ -320,9 +391,9 @@ def api_generate_voiceover():
     # Get voice config
     voice_info = VOICE_MAP.get(voice_key, VOICE_MAP['bn-female'])
 
-    # Speed mapping — tuned from 20-voice comparison test for most human-like sound
-    rate_map = {'slow': '-18%', 'normal': '-12%', 'fast': '+8%'}
-    rate = rate_map.get(speed, '-12%')
+    # Speed mapping — tuned for most natural human-like sound
+    rate_map = {'slow': '-15%', 'normal': '-6%', 'fast': '+10%'}
+    rate = rate_map.get(speed, '-6%')
 
     try:
         filename = f"voiceover_{uuid.uuid4().hex[:8]}.mp3"
@@ -346,8 +417,8 @@ def api_generate_voiceover():
             female_file = os.path.join(OUTPUT_DIR, f"duo_female_{uuid.uuid4().hex[:6]}.mp3")
             
             async def _gen_duo():
-                await _generate_tts(part1, male_voice['voice'], rate, male_file)
-                await _generate_tts(part2, female_voice['voice'], rate, female_file)
+                await _generate_tts(part1, male_voice['voice'], rate, male_file, voice_key=male_key)
+                await _generate_tts(part2, female_voice['voice'], rate, female_file, voice_key=female_key)
             
             asyncio.run(_gen_duo())
             
@@ -365,7 +436,7 @@ def api_generate_voiceover():
             lang_label = male_voice['lang']
         else:
             # Standard single voice generation
-            asyncio.run(_generate_tts(text, voice_info['voice'], rate, filepath))
+            asyncio.run(_generate_tts(text, voice_info['voice'], rate, filepath, voice_key=voice_key))
             gender_label = voice_info['gender']
             lang_label = voice_info['lang']
 
@@ -461,8 +532,8 @@ def api_trial_voice():
                 female_tmp = os.path.join(TRIAL_DIR, f"trial_{voice_key}_female_tmp.mp3")
 
                 async def _gen_trial_duo():
-                    await _generate_tts(part1, male_voice['voice'], '+0%', male_tmp)
-                    await _generate_tts(part2, female_voice['voice'], '+0%', female_tmp)
+                    await _generate_tts(part1, male_voice['voice'], '-6%', male_tmp, voice_key=f"{lang_prefix}-male")
+                    await _generate_tts(part2, female_voice['voice'], '-6%', female_tmp, voice_key=f"{lang_prefix}-female")
 
                 asyncio.run(_gen_trial_duo())
                 _merge_audio_files(male_tmp, female_tmp, cache_file)
@@ -475,7 +546,7 @@ def api_trial_voice():
                     pass
             else:
                 voice_info = VOICE_MAP[voice_key]
-                asyncio.run(_generate_tts(demo_text, voice_info['voice'], '+0%', cache_file))
+                asyncio.run(_generate_tts(demo_text, voice_info['voice'], '-6%', cache_file, voice_key=voice_key))
         except Exception as e:
             return jsonify({"success": False, "error": f"Trial generation failed: {str(e)}"}), 500
 
