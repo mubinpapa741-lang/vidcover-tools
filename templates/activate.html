@@ -1,12 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Activate Plan — VidCover Tools{% endblock %}
+{% block title %}প্ল্যান Activate করুন — VidCover Tools{% endblock %}
 
 {% block content %}
 <section class="activate-section">
     <div class="section-container">
         <div class="section-header">
-            <h1 class="section-title">🔑 Activate Your Plan</h1>
-            <p class="section-subtitle">Enter your activation code below to unlock your subscription for 30 days.</p>
+            <div class="section-overline">🔑 প্ল্যান অ্যাক্টিভেশন</div>
+            <h1 class="section-title">আপনার Code দিন — <br>৩০ সেকেন্ডে Active!</h1>
+            <p class="section-subtitle">আপনার Activation Code নিচে লিখুন। ৩০ দিনের Full Access চালু হয়ে যাবে!</p>
+        </div>
+
+        <!-- Steps -->
+        <div class="activate-steps animate-fade-in">
+            <div class="step-item">
+                <div class="step-num">১</div>
+                <span>Code লিখুন</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-item">
+                <div class="step-num">২</div>
+                <span>Activate চাপুন</span>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-item">
+                <div class="step-num">৩</div>
+                <span>Tools ব্যবহার করুন!</span>
+            </div>
         </div>
 
         <!-- Activation Form -->
@@ -14,37 +33,39 @@
             <div class="activate-card-glow"></div>
             <form id="activate-form" class="activate-form">
                 <div class="form-group">
-                    <label for="activation-code" class="form-label">Activation Code</label>
+                    <label for="activation-code" class="form-label">🔐 আপনার Activation Code</label>
                     <div class="input-wrapper">
-                        <span class="input-icon">🔐</span>
+                        <span class="input-icon">🔑</span>
                         <input 
                             type="text" 
                             id="activation-code" 
                             name="code" 
                             class="form-input" 
-                            placeholder="Enter your activation code..." 
+                            placeholder="এখানে আপনার Code লিখুন..." 
                             autocomplete="off"
                             required
+                            style="text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem;"
                         >
                     </div>
+                    <small style="color:var(--text-muted); margin-top:6px; display:block;">📋 Code টি হুবহু লিখুন — যেমন: VID-BUSINESS-001</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="user-label" class="form-label">Label <span class="form-optional">(Optional)</span></label>
+                    <label for="user-label" class="form-label">🏷️ আপনার নাম <span class="form-optional">(Optional)</span></label>
                     <div class="input-wrapper">
-                        <span class="input-icon">🏷️</span>
+                        <span class="input-icon">👤</span>
                         <input 
                             type="text" 
                             id="user-label" 
                             name="label" 
                             class="form-input" 
-                            placeholder="e.g., Client Name, Project..."
+                            placeholder="আপনার নাম বা Channel নাম..."
                         >
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-lg btn-full" id="activate-btn">
-                    <span class="btn-text">⚡ Activate Plan</span>
+                    <span class="btn-text">⚡ Activate করুন — এখনই!</span>
                     <span class="btn-loading" style="display:none;">
                         <span class="spinner"></span> Activating...
                     </span>
@@ -57,39 +78,85 @@
             <!-- Activated Plan Info -->
             <div id="activated-plan-info" class="activated-plan-info" style="display:none;">
                 <div class="activated-icon">🎉</div>
-                <h3 class="activated-title">Plan Activated Successfully!</h3>
+                <h3 class="activated-title">অভিনন্দন! Plan Active হয়ে গেছে!</h3>
+                <p style="color:var(--text-muted); margin-bottom:20px;">এখন থেকে আপনি সব VoiceCover Tools ব্যবহার করতে পারবেন!</p>
                 <div class="activated-details">
                     <div class="activated-detail">
-                        <span class="detail-label">Plan:</span>
+                        <span class="detail-label">📦 প্ল্যান:</span>
                         <span class="detail-value" id="activated-plan-name"></span>
                     </div>
                     <div class="activated-detail">
-                        <span class="detail-label">Expires:</span>
+                        <span class="detail-label">📅 মেয়াদ শেষ:</span>
                         <span class="detail-value" id="activated-plan-expires"></span>
                     </div>
                     <div class="activated-detail">
-                        <span class="detail-label">Days Remaining:</span>
-                        <span class="detail-value" id="activated-plan-days"></span>
+                        <span class="detail-label">⏳ বাকি আছে:</span>
+                        <span class="detail-value" id="activated-plan-days" style="color:#10b981; font-weight:700;"></span>
                     </div>
                 </div>
-                <a href="/tools" class="btn btn-primary btn-lg">🛠️ Go to Tools →</a>
+                <a href="/tools" class="btn btn-primary btn-lg" style="margin-top:20px; display:inline-flex; gap:8px; align-items:center;">
+                    🛠️ এখনই Tools ব্যবহার করুন →
+                </a>
             </div>
         </div>
 
         <!-- Plan Tiers Info -->
         <div class="activate-plans-info animate-fade-in-up delay-1">
-            <h3 class="plans-info-title">Available Plan Tiers</h3>
+            <h3 class="plans-info-title">📋 Available Plans</h3>
             <div class="plans-info-grid">
                 {% for tier, info in plans.items() %}
                 <div class="plan-info-chip" style="border-color: {{ info.color }}30; background: {{ info.color }}10;">
                     <span class="chip-emoji">{{ info.emoji }}</span>
-                    <span class="chip-name" style="color: {{ info.color }}">Plan {{ tier }}: {{ info.name }}</span>
+                    <span class="chip-name" style="color: {{ info.color }}">{{ info.name }} — ৳{{ info.price }}/মাস</span>
                 </div>
                 {% endfor %}
             </div>
+            <p style="color:var(--text-muted); text-align:center; margin-top:12px; font-size:0.85rem;">
+                ⚠️ মেয়াদ শেষ হলে Plan স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে। পুনরায় Activate করতে নতুন Code লাগবে।
+            </p>
         </div>
     </div>
 </section>
+
+<style>
+.activate-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--text);
+}
+.step-num {
+    width: 28px; height: 28px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.step-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+@media (max-width: 600px) {
+    .step-arrow { display: none; }
+    .activate-steps { gap: 8px; }
+    .step-item { font-size: 0.8rem; padding: 8px 12px; }
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
