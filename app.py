@@ -542,7 +542,9 @@ def api_trial_play(voice_key):
         return jsonify({"success": False, "error": "Trial not generated yet!"}), 404
     # Stream for playback only — no as_attachment (prevents easy download)
     response = send_file(cache_file, mimetype='audio/mpeg', as_attachment=False)
-    response.headers['Cache-Control'] = 'public, max-age=86400'
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
     return response
 
 

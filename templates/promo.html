@@ -289,7 +289,7 @@ async function playTrialVoice(voiceKey, cardEl) {
         if (data.success) {
             player.style.display = 'block';
             nameEl.textContent = data.message;
-            trialAudio.src = data.play_url;
+            trialAudio.src = data.play_url + '?t=' + Date.now();
             trialAudio.play();
             playBtn.textContent = '🔊';
 
