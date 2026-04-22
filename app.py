@@ -152,9 +152,9 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # Professional Neural Voice Map — BEST of all tests applied
 # Mix of dedicated + multilingual voices — each picked for BEST quality per language
 VOICE_MAP = {
-    # Bangla Female — Indian Bengali Tanishaa = more natural tone
-    'bn-female': {'voice': 'bn-IN-TanishaaNeural',            'lang': 'Bangla', 'gender': 'Female', 'flag': '🇧🇩'},
-    # Bangla Male — Bangladesh Bengali Pradeep = authentic Bangla pronunciation
+    # Bangla Female — Bangladesh Nabanita = authentic Bangladeshi tone, natural & smooth
+    'bn-female': {'voice': 'bn-BD-NabanitaNeural',             'lang': 'Bangla', 'gender': 'Female', 'flag': '🇧🇩'},
+    # Bangla Male — Bangladesh Pradeep = authentic Bangla pronunciation
     'bn-male':   {'voice': 'bn-BD-PradeepNeural',             'lang': 'Bangla', 'gender': 'Male',   'flag': '🇧🇩'},
     # English US — Latest gen voices (already best)
     'en-male':   {'voice': 'en-US-AndrewNeural',     'lang': 'English (US)', 'gender': 'Male',   'flag': '🇺🇸'},
