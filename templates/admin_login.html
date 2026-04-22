@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin Login — VidCover Tools{% endblock %}
+
+{% block content %}
+<section class="admin-login-section">
+    <div class="admin-login-wrapper">
+        <div class="admin-login-card animate-fade-in">
+            <div class="admin-login-glow"></div>
+            
+            <div class="admin-login-header">
+                <div class="admin-lock-icon">🔒</div>
+                <h1 class="admin-login-title">Admin Access</h1>
+                <p class="admin-login-subtitle">Enter your admin password to continue</p>
+            </div>
+
+            {% if error %}
+            <div class="admin-error animate-fade-in">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/admin/login" class="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-password" class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔐</span>
+                        <input 
+                            type="password" 
+                            id="admin-password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Enter admin password..."
+                            autofocus
+                            required
+                        >
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-full">
+                    🔓 Login to Dashboard
+                </button>
+            </form>
+
+            <div class="admin-login-footer">
+                <a href="/" class="admin-back-link">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

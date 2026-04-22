@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+{% block title %}VoiceCover Tools — VidCover Tools{% endblock %}
+
+{% block content %}
+<section class="tools-hero">
+    <div class="section-container">
+        <div class="tools-hero-content animate-fade-in">
+            <div class="tools-hero-badge">🎙️ AI Neural VoiceCover</div>
+            <h1 class="tools-hero-title">Professional <span class="hero-gradient-text">VoiceCovers</span></h1>
+            <p class="tools-hero-subtitle">Microsoft Neural AI — Real artist-quality voices, Male & Female options!</p>
+        </div>
+    </div>
+</section>
+
+{% if active_plans %}
+<!-- VoiceCover Tool -->
+<section class="voiceover-section">
+    <div class="section-container">
+        <div class="voiceover-main-card animate-fade-in-up">
+            <div class="voiceover-card-glow"></div>
+
+            <!-- Active Plan Badge -->
+            <div class="active-plan-indicator">
+                <span class="plan-active-dot"></span>
+                <span>{{ active_plans[0].plan_name }} Plan — {{ active_plans[0].days_remaining }} days left</span>
+            </div>
+
+            <!-- Plan Limits Dashboard -->
+            <div class="plan-limits-bar">
+                <div class="limit-item">
+                    <span class="limit-icon">📝</span>
+                    <span class="limit-text"><strong>{{ plan_limits.max_words }}</strong> words/video</span>
+                </div>
+                <div class="limit-divider"></div>
+                <div class="limit-item">
+                    <span class="limit-icon">🎬</span>
+                    <span class="limit-text" id="daily-usage-display"><strong>{{ daily_used }}</strong>/{{ plan_limits.daily_limit }} today</span>
+                </div>
+                <div class="limit-divider"></div>
+                <div class="limit-item">
+                    <span class="limit-icon">🎤</span>
+                    <span class="limit-text">{{ plan_limits.voice_label }}</span>
+                </div>
+            </div>
+
+            <!-- Text Input Area -->
+            <div class="voiceover-input-section">
+                <label for="voiceover-text" class="voiceover-label">
+                    ✍️ Your Text
+                    <span class="char-counter" id="char-counter">0 / {{ plan_limits.max_words | default(250) }} words</span>
+                </label>
+                <textarea 
+                    id="voiceover-text" 
+                    class="voiceover-textarea" 
+                    placeholder="এখানে আপনার টেক্সট লিখুন...
+
+বা English এ লিখুন: 'Welcome to today's video...'"
+                    rows="5"
+                    maxlength="5000"
+                ></textarea>
+            </div>
+
+            <!-- Gender Toggle (Male/Female/Mixed) -->
+            <div class="gender-section">
+                <label class="control-label">👤 Voice Artist</label>
+                <div class="gender-toggle">
+                    <button class="gender-btn active" data-gender="female" id="gender-female">
+                        <span class="gender-icon">👩</span>
+                        <span class="gender-text">Female</span>
+                    </button>
+                    <button class="gender-btn" data-gender="male" id="gender-male">
+                        <span class="gender-icon">👨</span>
+                        <span class="gender-text">Male</span>
+                    </button>
+                    <button class="gender-btn" data-gender="mixed" id="gender-mixed" style="background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.15)); border: 1px solid rgba(168,85,247,0.3);">
+                        <span class="gender-icon">👫</span>
+                        <span class="gender-text">Duo Mix</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls Row -->
+            <div class="voiceover-controls">
+                <div class="control-group">
+                    <label class="control-label">🌐 Language</label>
+                    <select id="voiceover-lang" class="form-input form-select voiceover-select">
+                        <option value="bn">🇧🇩 Bangla (বাংলা)</option>
+                        <option value="en">🇺🇸 English (US)</option>
+                        {% if active_plans[0].plan_tier >= 2 %}
+                        <option value="en-uk">🇬🇧 English (UK)</option>
+                        <option value="en-au">🇦🇺 English (Australia)</option>
+                        <option value="en-in">🇮🇳 English (India)</option>
+                        <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">⚡ Speed</label>
+                    <div class="speed-toggle">
+                        <button class="speed-btn" data-speed="slow">Slow</button>
+                        <button class="speed-btn active" data-speed="normal">Normal</button>
+                        <button class="speed-btn" data-speed="fast">Fast</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generate-btn" class="btn btn-primary btn-lg btn-full generate-btn" onclick="generateVoiceover()">
+                <span id="generate-text">🎙️ Generate VoiceCover</span>
+                <span id="generate-loading" style="display:none;">
+                    <span class="spinner"></span> Generating Neural Voice...
+                </span>
+            </button>
+
+            <!-- Result Area -->
+            <div id="voiceover-result" class="voiceover-result" style="display:none;">
+                <div class="result-header">
+                    <span class="result-icon">✅</span>
+                    <span class="result-title" id="result-title">VoiceCover Ready!</span>
+                </div>
+                
+                <!-- Audio Player -->
+                <div class="audio-player-wrapper">
+                    <audio id="audio-player" controls class="audio-player"></audio>
+                </div>
+
+                <!-- Download Button -->
+                <a id="download-btn" href="#" class="btn btn-primary btn-full download-btn" download>
+                    📥 Download VoiceCover (MP3)
+                </a>
+
+                <!-- Result Info -->
+                <div class="result-meta">
+                    <span id="result-lang">🌐 Bangla</span>
+                    <span id="result-gender">👩 Female</span>
+                    <span id="result-chars">📝 0 chars</span>
+                </div>
+            </div>
+
+            <!-- Error Area -->
+            <div id="voiceover-error" class="voiceover-error" style="display:none;">
+                <span class="error-icon">❌</span>
+                <span id="error-message">Something went wrong!</span>
+            </div>
+        </div>
+
+        <!-- Quick Templates -->
+        <div class="templates-section animate-fade-in-up">
+            <h3 class="subsection-title">📋 Quick Templates — Click to Use</h3>
+            <div class="templates-grid">
+                <div class="template-card" onclick="useTemplate(this)" data-lang="bn">
+                    <div class="template-lang">🇧🇩 Bangla</div>
+                    <p class="template-text">আজকের ভিডিওতে আমরা দেখব কিভাবে সহজেই প্রফেশনাল ভিডিও কভার তৈরি করা যায়। চলুন শুরু করি!</p>
+                </div>
+                <div class="template-card" onclick="useTemplate(this)" data-lang="bn">
+                    <div class="template-lang">🇧🇩 Bangla</div>
+                    <p class="template-text">স্বাগতম আমার চ্যানেলে! আজকের ভিডিওতে আমি আপনাদের সাথে শেয়ার করব একটি অসাধারণ টিউটোরিয়াল। শেষ পর্যন্ত দেখবেন!</p>
+                </div>
+                <div class="template-card" onclick="useTemplate(this)" data-lang="en">
+                    <div class="template-lang">🇺🇸 English</div>
+                    <p class="template-text">Welcome to today's video! In this tutorial, you'll learn how to create stunning video covers like a pro. Let's get started!</p>
+                </div>
+                <div class="template-card" onclick="useTemplate(this)" data-lang="en">
+                    <div class="template-lang">🇺🇸 English</div>
+                    <p class="template-text">Hey everyone! If you're looking for the best tips to grow your YouTube channel, you're in the right place. Let's dive in!</p>
+                </div>
+                <div class="template-card" onclick="useTemplate(this)" data-lang="bn">
+                    <div class="template-lang">🇧🇩 Bangla</div>
+                    <p class="template-text">প্রিয় দর্শক, আজকে আমি দেখাব কিভাবে মাত্র ৫ মিনিটে একটি চমৎকার থাম্বনেইল ডিজাইন করা যায়। দেখতে থাকুন!</p>
+                </div>
+                <div class="template-card" onclick="useTemplate(this)" data-lang="hi">
+                    <div class="template-lang">🇮🇳 Hindi</div>
+                    <p class="template-text">नमस्ते दोस्तों! आज के वीडियो में हम सीखेंगे कि कैसे प्रोफेशनल वीडियो कवर बनाया जाता है। चलिए शुरू करते हैं!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pro Tips -->
+        <div class="voice-quality-section animate-fade-in-up">
+            <div class="voice-quality-card" style="text-align:left;">
+                <h3 style="text-align:center;">💡 Pro Tips — Get the Best Results</h3>
+                <div style="display:grid;gap:12px;margin-top:18px;">
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <span style="font-size:1.3rem;">🎯</span>
+                        <div>
+                            <strong style="color:var(--text-primary);">Write naturally</strong>
+                            <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:2px;">Type like you're talking. The AI reads your tone and pauses perfectly.</p>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <span style="font-size:1.3rem;">⚡</span>
+                        <div>
+                            <strong style="color:var(--text-primary);">Use Slow for storytelling</strong>
+                            <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:2px;">Slow speed gives a calm, documentary feel. Perfect for explainer videos.</p>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <span style="font-size:1.3rem;">🔥</span>
+                        <div>
+                            <strong style="color:var(--text-primary);">Fast for energy</strong>
+                            <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:2px;">Use Fast speed for intros, ads, and hype videos. Keeps viewers hooked!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% else %}
+<!-- No Active Plan -->
+<section class="tools-locked-section">
+    <div class="section-container">
+        <div class="tools-locked-card animate-fade-in">
+            <div class="locked-icon">🔒</div>
+            <h2 class="locked-title">Plan Required</h2>
+            <p class="locked-desc">You need an active plan to use VoiceCover Tools. Activate your plan to start creating professional voiceovers!</p>
+            <div class="locked-features">
+                <span>🎤 Neural AI Voices</span>
+                <span>👩👨 Male & Female</span>
+                <span>🇧🇩 Bangla + English</span>
+                <span>📥 MP3 Download</span>
+            </div>
+            <a href="/activate" class="btn btn-primary btn-lg">🔑 Activate Your Plan</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Character counter
+const textarea = document.getElementById('voiceover-text');
+const charCounter = document.getElementById('char-counter');
+
+if (textarea) {
+    textarea.addEventListener('input', () => {
+        // Proper word counting for Bangla/Unicode text
+        let text = textarea.value.trim();
+        // Remove zero-width characters (common in Bangla text)
+        text = text.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+        const words = text ? text.split(/\s+/).length : 0;
+        const maxWords = {{ plan_limits.max_words | default(250) }};
+        charCounter.textContent = `${words} / ${maxWords} words`;
+        if (words > maxWords) charCounter.style.color = '#ef4444';
+        else if (words > maxWords * 0.8) charCounter.style.color = '#f59e0b';
+        else charCounter.style.color = '';
+    });
+}
+
+// Gender toggle
+document.querySelectorAll('.gender-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
+// Speed toggle
+document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
+// Use template
+function useTemplate(el) {
+    const text = el.querySelector('.template-text').textContent;
+    const lang = el.dataset.lang || 'bn';
+    textarea.value = text;
+    textarea.dispatchEvent(new Event('input'));
+    document.getElementById('voiceover-lang').value = lang;
+    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    textarea.focus();
+}
+
+// Generate voiceover
+async function generateVoiceover() {
+    const text = textarea.value.trim();
+    const lang = document.getElementById('voiceover-lang').value;
+    const gender = document.querySelector('.gender-btn.active').dataset.gender;
+    const speed = document.querySelector('.speed-btn.active').dataset.speed;
+    
+    // Build voice key: lang-gender (e.g., "bn-female", "en-male", "bn-mixed")
+    const voiceKey = `${lang}-${gender}`;
+
+    const generateBtn = document.getElementById('generate-btn');
+    const generateText = document.getElementById('generate-text');
+    const generateLoading = document.getElementById('generate-loading');
+    const resultArea = document.getElementById('voiceover-result');
+    const errorArea = document.getElementById('voiceover-error');
+
+    if (!text) {
+        errorArea.style.display = 'flex';
+        document.getElementById('error-message').textContent = 'Please enter some text first!';
+        resultArea.style.display = 'none';
+        return;
+    }
+
+    // Show loading
+    generateBtn.disabled = true;
+    generateText.style.display = 'none';
+    generateLoading.style.display = 'inline-flex';
+    resultArea.style.display = 'none';
+    errorArea.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/voiceover', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, voice: voiceKey, speed })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            resultArea.style.display = 'block';
+            document.getElementById('result-title').textContent = data.message;
+            document.getElementById('result-lang').textContent = `🌐 ${data.language}`;
+            document.getElementById('result-gender').textContent = `${data.gender === 'Female' ? '👩' : '👨'} ${data.gender}`;
+            document.getElementById('result-chars').textContent = `📝 ${data.text_length} chars`;
+
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.src = data.download_url;
+            audioPlayer.load();
+
+            const downloadBtn = document.getElementById('download-btn');
+            downloadBtn.href = data.download_url;
+            downloadBtn.download = data.filename;
+
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Update daily usage counter
+            if (data.daily_used !== undefined) {
+                const usageEl = document.getElementById('daily-usage-display');
+                if (usageEl) usageEl.innerHTML = `<strong>${data.daily_used}</strong>/${data.daily_limit} today`;
+            }
+        } else {
+            errorArea.style.display = 'flex';
+            document.getElementById('error-message').textContent = data.error || 'Generation failed!';
+        }
+    } catch (err) {
+        errorArea.style.display = 'flex';
+        document.getElementById('error-message').textContent = 'Network error! Please try again.';
+    } finally {
+        generateBtn.disabled = false;
+        generateText.style.display = 'inline-flex';
+        generateLoading.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

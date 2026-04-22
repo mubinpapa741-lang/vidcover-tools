@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="VidCover Tools — Premium subscription-based video cover & thumbnail tools">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VidCover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="VidCover Tools">
+    <meta name="msapplication-TileColor" content="#7c3aed">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-512.png') }}">
+
+    <title>{% block title %}VidCover Tools{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Install App Banner (PWA) -->
+    <div class="install-banner" id="install-banner" style="display:none;">
+        <div class="install-banner-content">
+            <div class="install-banner-icon">📲</div>
+            <div class="install-banner-text">
+                <strong>Install VidCover Tools</strong>
+                <span>Add to your home screen for app experience!</span>
+            </div>
+            <button class="btn btn-primary btn-sm" id="install-btn">Install App</button>
+            <button class="install-close" id="install-close">&times;</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <span class="brand-icon">🎬</span>
+                <span class="brand-text">VidCover <span class="brand-highlight">Tools</span></span>
+            </a>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="nav-links">
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <span class="nav-icon">🏠</span> Home
+                </a>
+                <a href="/activate" class="nav-link {% if request.path == '/activate' %}active{% endif %}">
+                    <span class="nav-icon">🔑</span> Activate Plan
+                </a>
+                <a href="/tools" class="nav-link {% if request.path == '/tools' %}active{% endif %}">
+                    <span class="nav-icon">🛠️</span> Tools
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <a href="/" class="bottom-nav-item {% if request.path == '/' %}active{% endif %}">
+            <span class="bottom-nav-icon">🏠</span>
+            <span class="bottom-nav-label">Home</span>
+        </a>
+        <a href="/activate" class="bottom-nav-item {% if request.path == '/activate' %}active{% endif %}">
+            <span class="bottom-nav-icon">🔑</span>
+            <span class="bottom-nav-label">Activate</span>
+        </a>
+        <a href="/tools" class="bottom-nav-item {% if request.path == '/tools' %}active{% endif %}">
+            <span class="bottom-nav-icon">🛠️</span>
+            <span class="bottom-nav-label">Tools</span>
+        </a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="brand-icon">🎬</span> VidCover Tools
+            </div>
+            <div class="footer-text">
+                &copy; 2026 VidCover Tools. Premium Video Tools Platform.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Service Worker Registration + PWA Install -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(reg => {
+                        console.log('[PWA] Service Worker registered:', reg.scope);
+                        
+                        // Check for updates every 60 seconds
+                        setInterval(() => {
+                            reg.update();
+                        }, 60000);
+                        
+                        // Listen for new service worker
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    if (confirm('🔄 New update available! Reload to update?')) {
+                                        newWorker.postMessage('SKIP_WAITING');
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.log('[PWA] SW registration failed:', err));
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installBtn = document.getElementById('install-btn');
+        const installClose = document.getElementById('install-close');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install banner
+            if (installBanner && !localStorage.getItem('pwa-install-dismissed')) {
+                installBanner.style.display = 'block';
+            }
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('[PWA] App installed!');
+                }
+                deferredPrompt = null;
+                installBanner.style.display = 'none';
+            });
+        }
+
+        if (installClose) {
+            installClose.addEventListener('click', () => {
+                installBanner.style.display = 'none';
+                localStorage.setItem('pwa-install-dismissed', 'true');
+            });
+        }
+
+        // Detect if running as installed app
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.body.classList.add('pwa-standalone');
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

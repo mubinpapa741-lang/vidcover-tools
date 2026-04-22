@@ -1,0 +1,538 @@
+{% extends "base.html" %}
+{% block title %}VidCover — Professional AI VoiceCover for YouTube, TikTok & More{% endblock %}
+
+{% block content %}
+<!-- PROMO LINK BANNER -->
+{% if promo_link %}
+<div class="promo-link-banner" id="promo-banner">
+    <div class="promo-link-banner-content">
+        <div class="promo-link-banner-left">
+            <span class="promo-link-pulse"></span>
+            <span class="promo-link-badge">🎁 SPECIAL OFFER</span>
+            <span class="promo-link-text">আজকের Exclusive Deal মিস করবেন না!</span>
+        </div>
+        <a href="{{ promo_link }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm promo-link-cta">
+            🔥 Get Special Offer →
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- PROMO HERO -->
+<section class="hero" id="hero">
+    <div class="hero-bg-effects">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge animate-fade-in">
+            <span class="badge-dot"></span>
+            🇧🇩 Bangladesh's #1 AI VoiceCover Platform
+        </div>
+        <h1 class="hero-title animate-fade-in-up">
+            মাত্র ৳199 টাকায়<br>
+            <span class="hero-gradient-text">Professional Voiceover</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in-up delay-1">
+            আর Voice Artist খুঁজতে হবে না! VidCover ব্যবহার করে <strong>Bangla ও English</strong> এ 
+            Studio-Quality Voiceover তৈরি করুন — মাত্র ৫ সেকেন্ডে। YouTube, TikTok, Facebook সব কিছুর জন্য।
+        </p>
+        <div class="hero-actions animate-fade-in-up delay-2">
+            <a href="{{ promo_link if promo_link else '/activate' }}" {% if promo_link %}target="_blank" rel="noopener"{% endif %} class="btn btn-primary btn-lg" style="font-size:1.1rem;padding:16px 36px;">
+                🚀 এখনই শুরু করুন — ৳199
+            </a>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="trust-badges animate-fade-in-up delay-3">
+            <div class="trust-item">
+                <span class="trust-icon">✅</span>
+                <span>কোনো মাইক্রোফোন লাগবে না</span>
+            </div>
+            <div class="trust-divider">•</div>
+            <div class="trust-item">
+                <span class="trust-icon">✅</span>
+                <span>Male & Female Voice</span>
+            </div>
+            <div class="trust-divider">•</div>
+            <div class="trust-item">
+                <span class="trust-icon">✅</span>
+                <span>Instant MP3 Download</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 🎧 VOICE TRIAL SECTION — Listen Before You Buy -->
+<section class="trial-section" id="trial">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-overline">🎧 ফ্রি ট্রায়াল</div>
+            <h2 class="section-title">কিনার আগে শুনুন — সব Voice FREE তে!</h2>
+            <p class="section-subtitle">নিচের যেকোনো Voice এ ক্লিক করুন এবং শুনুন কতটা Professional শোনায়!</p>
+        </div>
+
+        <!-- Trial Player -->
+        <div class="trial-player-wrap animate-on-scroll">
+            <div class="trial-player" id="trialPlayer" style="display:none;">
+                <div class="trial-now-playing">
+                    <div class="trial-eq">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <span id="trialVoiceName">—</span>
+                </div>
+                <audio id="trialAudio" controls controlsList="nodownload nofullscreen noremoteplayback" disableRemotePlayback oncontextmenu="return false;" style="width:100%;"></audio>
+                <p class="trial-note">⚠️ এটি শুধুমাত্র Demo — নিজের Text দিয়ে VoiceCover করতে Plan নিন!</p>
+            </div>
+        </div>
+
+        <!-- Voice Cards Grid -->
+        <div class="trial-grid">
+            <!-- ===== BANGLA ===== -->
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('bn-female', this)">
+                <div class="trial-card-flag">🇧🇩</div>
+                <div class="trial-card-info">
+                    <h4>বাংলা Female</h4>
+                    <p>Tanishaa — Soft & Natural Bengali</p>
+                </div>
+                <div class="trial-card-play" id="play-bn-female">▶</div>
+            </div>
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('bn-male', this)">
+                <div class="trial-card-flag">🇧🇩</div>
+                <div class="trial-card-info">
+                    <h4>বাংলা Male</h4>
+                    <p>Pradeep — Authentic Bangla Male</p>
+                </div>
+                <div class="trial-card-play" id="play-bn-male">▶</div>
+            </div>
+            <!-- 👫 BANGLA DUO MIX -->
+            <div class="trial-voice-card trial-duo-card animate-on-scroll" onclick="playTrialVoice('bn-mixed', this)">
+                <div class="trial-card-flag">👫</div>
+                <div class="trial-card-info">
+                    <h4>🇧🇩 বাংলা Duo Mix</h4>
+                    <p>50% Male + 50% Female — Combined!</p>
+                </div>
+                <div class="trial-card-play" id="play-bn-mixed">▶</div>
+            </div>
+
+            <!-- ===== ENGLISH US ===== -->
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-female', this)">
+                <div class="trial-card-flag">🇺🇸</div>
+                <div class="trial-card-info">
+                    <h4>English (US) Female</h4>
+                    <p>Ava — Ultra-Realistic & Warm</p>
+                </div>
+                <div class="trial-card-play" id="play-en-female">▶</div>
+            </div>
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-male', this)">
+                <div class="trial-card-flag">🇺🇸</div>
+                <div class="trial-card-info">
+                    <h4>English (US) Male</h4>
+                    <p>Andrew — Natural & Confident</p>
+                </div>
+                <div class="trial-card-play" id="play-en-male">▶</div>
+            </div>
+            <!-- 👫 ENGLISH US DUO MIX -->
+            <div class="trial-voice-card trial-duo-card animate-on-scroll" onclick="playTrialVoice('en-mixed', this)">
+                <div class="trial-card-flag">👫</div>
+                <div class="trial-card-info">
+                    <h4>🇺🇸 English (US) Duo Mix</h4>
+                    <p>50% Male + 50% Female — Combined!</p>
+                </div>
+                <div class="trial-card-play" id="play-en-mixed">▶</div>
+            </div>
+
+            <!-- ===== ENGLISH UK ===== -->
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-uk-female', this)">
+                <div class="trial-card-flag">🇬🇧</div>
+                <div class="trial-card-info">
+                    <h4>English (UK) Female</h4>
+                    <p>Libby — Crisp & Modern British</p>
+                </div>
+                <div class="trial-card-play" id="play-en-uk-female">▶</div>
+            </div>
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-uk-male', this)">
+                <div class="trial-card-flag">🇬🇧</div>
+                <div class="trial-card-info">
+                    <h4>English (UK) Male</h4>
+                    <p>Thomas — Warm British</p>
+                </div>
+                <div class="trial-card-play" id="play-en-uk-male">▶</div>
+            </div>
+            <!-- 👫 ENGLISH UK DUO MIX -->
+            <div class="trial-voice-card trial-duo-card animate-on-scroll" onclick="playTrialVoice('en-uk-mixed', this)">
+                <div class="trial-card-flag">👫</div>
+                <div class="trial-card-info">
+                    <h4>🇬🇧 English (UK) Duo Mix</h4>
+                    <p>50% Male + 50% Female — Combined!</p>
+                </div>
+                <div class="trial-card-play" id="play-en-uk-mixed">▶</div>
+            </div>
+
+            <!-- ===== ENGLISH AU ===== -->
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-au-female', this)">
+                <div class="trial-card-flag">🇦🇺</div>
+                <div class="trial-card-info">
+                    <h4>English (AU) Female</h4>
+                    <p>Natasha — Friendly Aussie</p>
+                </div>
+                <div class="trial-card-play" id="play-en-au-female">▶</div>
+            </div>
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-au-male', this)">
+                <div class="trial-card-flag">🇦🇺</div>
+                <div class="trial-card-info">
+                    <h4>English (AU) Male</h4>
+                    <p>William — Bold Aussie</p>
+                </div>
+                <div class="trial-card-play" id="play-en-au-male">▶</div>
+            </div>
+            <!-- 👫 ENGLISH AU DUO MIX -->
+            <div class="trial-voice-card trial-duo-card animate-on-scroll" onclick="playTrialVoice('en-au-mixed', this)">
+                <div class="trial-card-flag">👫</div>
+                <div class="trial-card-info">
+                    <h4>🇦🇺 English (AU) Duo Mix</h4>
+                    <p>50% Male + 50% Female — Combined!</p>
+                </div>
+                <div class="trial-card-play" id="play-en-au-mixed">▶</div>
+            </div>
+
+            <!-- ===== ENGLISH INDIA ===== -->
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-in-female', this)">
+                <div class="trial-card-flag">🇮🇳</div>
+                <div class="trial-card-info">
+                    <h4>English (India) Female</h4>
+                    <p>Neerja — Smooth Indian</p>
+                </div>
+                <div class="trial-card-play" id="play-en-in-female">▶</div>
+            </div>
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('en-in-male', this)">
+                <div class="trial-card-flag">🇮🇳</div>
+                <div class="trial-card-info">
+                    <h4>English (India) Male</h4>
+                    <p>Prabhat — Rich Indian</p>
+                </div>
+                <div class="trial-card-play" id="play-en-in-male">▶</div>
+            </div>
+            <!-- 👫 ENGLISH INDIA DUO MIX -->
+            <div class="trial-voice-card trial-duo-card animate-on-scroll" onclick="playTrialVoice('en-in-mixed', this)">
+                <div class="trial-card-flag">👫</div>
+                <div class="trial-card-info">
+                    <h4>🇮🇳 English (India) Duo Mix</h4>
+                    <p>50% Male + 50% Female — Combined!</p>
+                </div>
+                <div class="trial-card-play" id="play-en-in-mixed">▶</div>
+            </div>
+
+            <!-- ===== HINDI ===== -->
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('hi-female', this)">
+                <div class="trial-card-flag">🇮🇳</div>
+                <div class="trial-card-info">
+                    <h4>Hindi Female</h4>
+                    <p>Swara — Beautiful Natural Hindi</p>
+                </div>
+                <div class="trial-card-play" id="play-hi-female">▶</div>
+            </div>
+            <div class="trial-voice-card animate-on-scroll" onclick="playTrialVoice('hi-male', this)">
+                <div class="trial-card-flag">🇮🇳</div>
+                <div class="trial-card-info">
+                    <h4>Hindi Male</h4>
+                    <p>Brian Multi — Rich Natural Hindi</p>
+                </div>
+                <div class="trial-card-play" id="play-hi-male">▶</div>
+            </div>
+            <!-- 👫 HINDI DUO MIX -->
+            <div class="trial-voice-card trial-duo-card animate-on-scroll" onclick="playTrialVoice('hi-mixed', this)">
+                <div class="trial-card-flag">👫</div>
+                <div class="trial-card-info">
+                    <h4>🇮🇳 Hindi Duo Mix</h4>
+                    <p>50% Male + 50% Female — Combined!</p>
+                </div>
+                <div class="trial-card-play" id="play-hi-mixed">▶</div>
+            </div>
+        </div>
+
+        <div class="trial-cta animate-on-scroll">
+            <a href="/activate" class="btn btn-primary btn-lg">🚀 পছন্দ হয়েছে? এখনই Plan নিন!</a>
+        </div>
+    </div>
+</section>
+
+<!-- Trial JS -->
+<script>
+let currentTrialCard = null;
+const trialAudio = document.getElementById('trialAudio');
+
+async function playTrialVoice(voiceKey, cardEl) {
+    const player = document.getElementById('trialPlayer');
+    const nameEl = document.getElementById('trialVoiceName');
+    const playBtn = document.getElementById('play-' + voiceKey);
+
+    // Reset all cards
+    document.querySelectorAll('.trial-voice-card').forEach(c => c.classList.remove('trial-active'));
+    document.querySelectorAll('.trial-card-play').forEach(p => p.textContent = '▶');
+
+    // Mark active
+    cardEl.classList.add('trial-active');
+    playBtn.textContent = '⏳';
+
+    try {
+        const res = await fetch('/api/trial', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({voice: voiceKey})
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            player.style.display = 'block';
+            nameEl.textContent = data.message;
+            trialAudio.src = data.play_url;
+            trialAudio.play();
+            playBtn.textContent = '🔊';
+
+            // Scroll to player
+            player.scrollIntoView({behavior: 'smooth', block: 'center'});
+        } else {
+            playBtn.textContent = '❌';
+            alert(data.error || 'Failed to generate trial!');
+        }
+    } catch(e) {
+        playBtn.textContent = '❌';
+        alert('Network error! Please try again.');
+    }
+}
+
+// Reset icon when audio ends
+if(trialAudio) {
+    trialAudio.addEventListener('ended', () => {
+        document.querySelectorAll('.trial-card-play').forEach(p => {
+            if(p.textContent === '🔊') p.textContent = '▶';
+        });
+    });
+}
+</script>
+
+<!-- PROBLEM → SOLUTION -->
+<section class="benefits-section">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-overline">সমস্যা → সমাধান</div>
+            <h2 class="section-title">Voice Artist ভাড়া করা ব্যয়বহুল?<br>VidCover-ই সমাধান</h2>
+        </div>
+
+        <div class="promo-comparison">
+            <div class="compare-card compare-old animate-on-scroll">
+                <div class="compare-header compare-header-old">❌ আগে যা করতে হতো</div>
+                <ul class="compare-list">
+                    <li>😩 Voice Artist খুঁজতে ঘণ্টার পর ঘণ্টা</li>
+                    <li>💸 প্রতি ভিডিওতে ৫০০-২০০০ টাকা খরচ</li>
+                    <li>⏰ ডেলিভারি পেতে ২-৩ দিন</li>
+                    <li>😤 ভয়েস পছন্দ না হলে আবার পেমেন্ট</li>
+                    <li>🎤 নিজে বলতে গেলে মাইক, সাউন্ডপ্রুফ রুম লাগে</li>
+                </ul>
+            </div>
+            <div class="compare-vs">VS</div>
+            <div class="compare-card compare-new animate-on-scroll">
+                <div class="compare-header compare-header-new">✅ VidCover দিয়ে এখন</div>
+                <ul class="compare-list">
+                    <li>🚀 টেক্সট লিখুন → ৫ সেকেন্ডে Voice Ready</li>
+                    <li>💰 সারা মাস মাত্র ৳199 থেকে শুরু</li>
+                    <li>⚡ Instant Generate — কোনো ওয়েটিং নেই</li>
+                    <li>🔄 পছন্দ না হলে Unlimited বার Generate করুন</li>
+                    <li>📱 মোবাইল থেকেই করুন — কোনো Equipment লাগে না</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VOICE DEMO SECTION -->
+<section class="how-section">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-overline">কিভাবে কাজ করে?</div>
+            <h2 class="section-title">মাত্র ৩টি সহজ ধাপ</h2>
+            <p class="section-subtitle">কোনো Technical Knowledge লাগে না — সবাই পারবে!</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card animate-on-scroll">
+                <div class="step-number">01</div>
+                <div class="step-icon">🔑</div>
+                <h3 class="step-title">Plan Activate করুন</h3>
+                <p class="step-desc">আপনার পছন্দের Plan কিনুন। Code পেয়ে Activate করুন — ৩০ সেকেন্ডে সব Ready!</p>
+            </div>
+            <div class="step-connector">→</div>
+            <div class="step-card animate-on-scroll">
+                <div class="step-number">02</div>
+                <div class="step-icon">✍️</div>
+                <h3 class="step-title">Script টাইপ করুন</h3>
+                <p class="step-desc">বাংলায় বা English এ আপনার ভিডিওর Script লিখুন। Male বা Female Voice Select করুন।</p>
+            </div>
+            <div class="step-connector">→</div>
+            <div class="step-card animate-on-scroll">
+                <div class="step-number">03</div>
+                <div class="step-icon">📥</div>
+                <h3 class="step-title">Download করুন</h3>
+                <p class="step-desc">Generate Button চাপুন → MP3 Download করুন → যেকোনো Video Editor এ ব্যবহার করুন!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WHO IS THIS FOR -->
+<section class="benefits-section">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-overline">কাদের জন্য?</div>
+            <h2 class="section-title">VidCover কাদের কাজে আসবে?</h2>
+        </div>
+        <div class="benefits-grid">
+            <div class="benefit-card animate-on-scroll">
+                <div class="benefit-icon-wrap" style="--accent-color: #ef4444;">
+                    <span class="benefit-icon">📹</span>
+                </div>
+                <h3>YouTubers</h3>
+                <p>ভিডিও Review, Tutorial, Vlog — Professional Voiceover দিয়ে আপনার Channel কে আলাদা করুন।</p>
+            </div>
+            <div class="benefit-card animate-on-scroll">
+                <div class="benefit-icon-wrap" style="--accent-color: #06b6d4;">
+                    <span class="benefit-icon">📱</span>
+                </div>
+                <h3>TikTok / Reels Creators</h3>
+                <p>Short Video তে Professional Voice দিন — Views বাড়বে, Engagement বাড়বে।</p>
+            </div>
+            <div class="benefit-card animate-on-scroll">
+                <div class="benefit-icon-wrap" style="--accent-color: #8b5cf6;">
+                    <span class="benefit-icon">🎓</span>
+                </div>
+                <h3>Online Course Creators</h3>
+                <p>বাংলায় বা English এ Course এর জন্য Clear, Professional Narration তৈরি করুন।</p>
+            </div>
+            <div class="benefit-card animate-on-scroll">
+                <div class="benefit-icon-wrap" style="--accent-color: #f59e0b;">
+                    <span class="benefit-icon">📰</span>
+                </div>
+                <h3>News / Facts Channels</h3>
+                <p>News Reading, Facts Video, Documentary — Calm, Authoritative Voice ব্যবহার করুন।</p>
+            </div>
+            <div class="benefit-card animate-on-scroll">
+                <div class="benefit-icon-wrap" style="--accent-color: #10b981;">
+                    <span class="benefit-icon">🏪</span>
+                </div>
+                <h3>Business Owners</h3>
+                <p>Product Demo, Ad Video, Promo Content — Custom Voiceover দিয়ে Sales বাড়ান।</p>
+            </div>
+            <div class="benefit-card animate-on-scroll">
+                <div class="benefit-icon-wrap" style="--accent-color: #ec4899;">
+                    <span class="benefit-icon">🎙️</span>
+                </div>
+                <h3>Podcast Creators</h3>
+                <p>Intro, Outro, Narration — High-Quality Voice দিয়ে আপনার Podcast কে Premium করুন।</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section class="plans-section" id="plans">
+    <div class="section-container">
+        <div class="section-header">
+            <div class="section-overline">📋 PRICING</div>
+            <h2 class="section-title">আপনার জন্য সেরা Plan বেছে নিন</h2>
+            <p class="section-subtitle">কোনো Hidden Fee নেই। কোনো Contract নেই। ৩০ দিনের Full Access।</p>
+        </div>
+
+        <div class="plans-grid">
+            <div class="plan-card plan-card-1 animate-on-scroll">
+                <div class="plan-card-glow"></div>
+                <div class="plan-header">
+                    <span class="plan-emoji">⚡</span>
+                    <h3 class="plan-name">Starter</h3>
+                    <p class="plan-tagline">Test করতে চান? এটা সেরা!</p>
+                    <div class="plan-price">৳199<span class="plan-price-period">/মাস</span></div>
+                </div>
+                <div class="plan-body">
+                    <ul class="plan-features">
+                        <li><span class="feat-check">✅</span> প্রতি Video তে 250 Words</li>
+                        <li><span class="feat-check">✅</span> দিনে 10টি VoiceCover</li>
+                        <li><span class="feat-check">✅</span> বাংলা Male & Female Voice</li>
+                        <li><span class="feat-check">✅</span> English Male & Female Voice</li>
+                        <li><span class="feat-check">✅</span> MP3 Download</li>
+                        <li class="feat-locked"><span class="feat-x">✕</span> Hindi & অন্যান্য Accents</li>
+                    </ul>
+                </div>
+                <div class="plan-footer">
+                    <a href="{{ promo_link if promo_link else '/activate' }}" {% if promo_link %}target="_blank" rel="noopener"{% endif %} class="btn btn-plan btn-plan-1">Starter নিন →</a>
+                    <span class="plan-guarantee">✅ 30 দিনের Full Access</span>
+                </div>
+            </div>
+
+            <div class="plan-card plan-card-2 plan-card-featured animate-on-scroll">
+                <div class="plan-card-glow"></div>
+                <div class="plan-badge-popular">🔥 সবচেয়ে জনপ্রিয়</div>
+                <div class="plan-header">
+                    <span class="plan-emoji">🔥</span>
+                    <h3 class="plan-name">Business</h3>
+                    <p class="plan-tagline">Serious Creator দের জন্য</p>
+                    <div class="plan-price">৳499<span class="plan-price-period">/মাস</span></div>
+                </div>
+                <div class="plan-body">
+                    <ul class="plan-features">
+                        <li><span class="feat-check">✅</span> প্রতি Video তে 1050 Words</li>
+                        <li><span class="feat-check">✅</span> দিনে 25টি VoiceCover</li>
+                        <li><span class="feat-check">✅</span> সব 12টি Neural Voice</li>
+                        <li><span class="feat-check">✅</span> বাংলা, English, Hindi</li>
+                        <li><span class="feat-check">✅</span> US, UK, AU, Indian Accent</li>
+                        <li><span class="feat-check">✅</span> Slow / Normal / Fast Speed</li>
+                        <li><span class="feat-check">✅</span> Priority Support</li>
+                    </ul>
+                </div>
+                <div class="plan-footer">
+                    <a href="{{ promo_link if promo_link else '/activate' }}" {% if promo_link %}target="_blank" rel="noopener"{% endif %} class="btn btn-plan btn-plan-2">Business নিন →</a>
+                    <span class="plan-guarantee">✅ 30 দিনের Full Access</span>
+                </div>
+            </div>
+
+            <div class="plan-card plan-card-3 animate-on-scroll">
+                <div class="plan-card-glow"></div>
+                <div class="plan-header">
+                    <span class="plan-emoji">💎</span>
+                    <h3 class="plan-name">Agency</h3>
+                    <p class="plan-tagline">Team & Heavy Users দের জন্য</p>
+                    <div class="plan-price">৳1499<span class="plan-price-period">/মাস</span></div>
+                </div>
+                <div class="plan-body">
+                    <ul class="plan-features">
+                        <li><span class="feat-check">✅</span> প্রতি Video তে 2500 Words</li>
+                        <li><span class="feat-check">✅</span> দিনে 100টি VoiceCover</li>
+                        <li><span class="feat-check">✅</span> সব 12টি Neural Voice</li>
+                        <li><span class="feat-check">✅</span> সব Languages & Accents</li>
+                        <li><span class="feat-check">✅</span> Commercial License</li>
+                        <li><span class="feat-check">✅</span> Priority Support</li>
+                    </ul>
+                </div>
+                <div class="plan-footer">
+                    <a href="{{ promo_link if promo_link else '/activate' }}" {% if promo_link %}target="_blank" rel="noopener"{% endif %} class="btn btn-plan btn-plan-3">Agency নিন →</a>
+                    <span class="plan-guarantee">✅ 30 দিনের Full Access</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+    <div class="section-container">
+        <div class="cta-card animate-on-scroll">
+            <div class="cta-glow"></div>
+            <h2 class="cta-title">আজই শুরু করুন — প্রথম ভিডিওটি Ready!</h2>
+            <p class="cta-desc">আর ভাবছেন কেন? হাজারো Creator VidCover ব্যবহার করে প্রতিদিন Professional Content তৈরি করছে। আপনিও পারবেন!</p>
+            <div class="cta-actions">
+                <a href="{{ promo_link if promo_link else '/activate' }}" {% if promo_link %}target="_blank" rel="noopener"{% endif %} class="btn btn-primary btn-lg" style="font-size:1.1rem;padding:16px 40px;">🚀 এখনই Plan নিন</a>
+            </div>
+            <p class="cta-note">মাত্র ৳199/মাস থেকে শুরু • যেকোনো সময় বাতিল করুন</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

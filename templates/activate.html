@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Activate Plan — VidCover Tools{% endblock %}
+
+{% block content %}
+<section class="activate-section">
+    <div class="section-container">
+        <div class="section-header">
+            <h1 class="section-title">🔑 Activate Your Plan</h1>
+            <p class="section-subtitle">Enter your activation code below to unlock your subscription for 30 days.</p>
+        </div>
+
+        <!-- Activation Form -->
+        <div class="activate-card animate-fade-in">
+            <div class="activate-card-glow"></div>
+            <form id="activate-form" class="activate-form">
+                <div class="form-group">
+                    <label for="activation-code" class="form-label">Activation Code</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔐</span>
+                        <input 
+                            type="text" 
+                            id="activation-code" 
+                            name="code" 
+                            class="form-input" 
+                            placeholder="Enter your activation code..." 
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-label" class="form-label">Label <span class="form-optional">(Optional)</span></label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🏷️</span>
+                        <input 
+                            type="text" 
+                            id="user-label" 
+                            name="label" 
+                            class="form-input" 
+                            placeholder="e.g., Client Name, Project..."
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-full" id="activate-btn">
+                    <span class="btn-text">⚡ Activate Plan</span>
+                    <span class="btn-loading" style="display:none;">
+                        <span class="spinner"></span> Activating...
+                    </span>
+                </button>
+            </form>
+
+            <!-- Result Message -->
+            <div id="activate-result" class="activate-result" style="display:none;"></div>
+
+            <!-- Activated Plan Info -->
+            <div id="activated-plan-info" class="activated-plan-info" style="display:none;">
+                <div class="activated-icon">🎉</div>
+                <h3 class="activated-title">Plan Activated Successfully!</h3>
+                <div class="activated-details">
+                    <div class="activated-detail">
+                        <span class="detail-label">Plan:</span>
+                        <span class="detail-value" id="activated-plan-name"></span>
+                    </div>
+                    <div class="activated-detail">
+                        <span class="detail-label">Expires:</span>
+                        <span class="detail-value" id="activated-plan-expires"></span>
+                    </div>
+                    <div class="activated-detail">
+                        <span class="detail-label">Days Remaining:</span>
+                        <span class="detail-value" id="activated-plan-days"></span>
+                    </div>
+                </div>
+                <a href="/tools" class="btn btn-primary btn-lg">🛠️ Go to Tools →</a>
+            </div>
+        </div>
+
+        <!-- Plan Tiers Info -->
+        <div class="activate-plans-info animate-fade-in-up delay-1">
+            <h3 class="plans-info-title">Available Plan Tiers</h3>
+            <div class="plans-info-grid">
+                {% for tier, info in plans.items() %}
+                <div class="plan-info-chip" style="border-color: {{ info.color }}30; background: {{ info.color }}10;">
+                    <span class="chip-emoji">{{ info.emoji }}</span>
+                    <span class="chip-name" style="color: {{ info.color }}">Plan {{ tier }}: {{ info.name }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/plans.js') }}"></script>
+{% endblock %}

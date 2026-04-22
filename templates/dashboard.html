@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — VidCover Tools{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">📊 Admin Dashboard</h1>
+                <p class="dashboard-subtitle">Real-time subscription management</p>
+            </div>
+            <div class="dashboard-actions">
+                <button class="btn btn-outline btn-sm" onclick="refreshDashboard()">🔄 Refresh</button>
+                <button class="btn btn-danger btn-sm" onclick="cleanupExpired()">🗑️ Cleanup Expired</button>
+                <a href="/admin/logout" class="admin-logout-btn">🚪 Logout</a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid animate-fade-in">
+            <div class="stat-card stat-card-active">
+                <div class="stat-icon">🟢</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-active">{{ stats.active_plans }}</div>
+                    <div class="stat-label">Active Plans</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-expired">
+                <div class="stat-icon">🔴</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-expired">{{ stats.expired_plans }}</div>
+                    <div class="stat-label">Expired Plans</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-codes">
+                <div class="stat-icon">🔑</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-codes">{{ stats.available_codes }}</div>
+                    <div class="stat-label">Available Codes</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-used">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="stat-used">{{ stats.used_codes }}</div>
+                    <div class="stat-label">Used Codes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Distribution -->
+        <div class="distribution-section animate-fade-in-up">
+            <h3 class="subsection-title">📊 Plan Distribution</h3>
+            <div class="distribution-grid">
+                <div class="distribution-card">
+                    <div class="dist-bar" style="--bar-color: #06b6d4; --bar-width: {{ ((stats.tier_counts.plan_1 or 0) / (stats.active_plans if stats.active_plans > 0 else 1)) * 100 }}%"></div>
+                    <div class="dist-info">
+                        <span class="dist-emoji">⚡</span>
+                        <span class="dist-name">Starter</span>
+                        <span class="dist-count" style="color: #06b6d4">{{ stats.tier_counts.plan_1 or 0 }}</span>
+                    </div>
+                </div>
+                <div class="distribution-card">
+                    <div class="dist-bar" style="--bar-color: #8b5cf6; --bar-width: {{ ((stats.tier_counts.plan_2 or 0) / (stats.active_plans if stats.active_plans > 0 else 1)) * 100 }}%"></div>
+                    <div class="dist-info">
+                        <span class="dist-emoji">🔥</span>
+                        <span class="dist-name">Business</span>
+                        <span class="dist-count" style="color: #8b5cf6">{{ stats.tier_counts.plan_2 or 0 }}</span>
+                    </div>
+                </div>
+                <div class="distribution-card">
+                    <div class="dist-bar" style="--bar-color: #f59e0b; --bar-width: {{ ((stats.tier_counts.plan_3 or 0) / (stats.active_plans if stats.active_plans > 0 else 1)) * 100 }}%"></div>
+                    <div class="dist-info">
+                        <span class="dist-emoji">💎</span>
+                        <span class="dist-name">Agency</span>
+                        <span class="dist-count" style="color: #f59e0b">{{ stats.tier_counts.plan_3 or 0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promo Link Management -->
+        <div class="promo-link-section animate-fade-in-up">
+            <h3 class="subsection-title">🔗 Promo Link Management</h3>
+            <div class="create-code-card" style="position:relative;">
+                <div class="promo-link-status" style="margin-bottom:16px;">
+                    {% if promo_link %}
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <span class="status-badge status-available" style="font-size:0.8rem;">✅ Active</span>
+                        <code class="code-display" id="current-promo-link" style="word-break:break-all;font-size:0.85rem;max-width:400px;display:inline-block;">{{ promo_link }}</code>
+                    </div>
+                    {% else %}
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="status-badge status-used" style="font-size:0.8rem;">❌ Not Set</span>
+                        <span style="color:rgba(255,255,255,0.5);font-size:0.85rem;">কোনো promo link সেট করা হয়নি</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <form id="promo-link-form" class="create-code-form">
+                    <div class="form-row">
+                        <div class="form-group form-group-flex">
+                            <label for="promo-link-input" class="form-label">Promo / Affiliate Link</label>
+                            <input type="url" id="promo-link-input" class="form-input" 
+                                   placeholder="https://your-affiliate-link.com/ref=abc123" 
+                                   value="{{ promo_link }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 Save Link</button>
+                    </div>
+                </form>
+                <div class="promo-link-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+                    <button class="btn btn-outline btn-sm" onclick="copyPromoLink()" {% if not promo_link %}disabled{% endif %} id="btn-copy-link">
+                        📋 Copy Link
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="copyPromoPageUrl()" title="Copy the full /promo page URL">
+                        🌐 Copy Promo Page URL
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deletePromoLink()" {% if not promo_link %}disabled{% endif %} id="btn-delete-link">
+                        🗑️ Remove Link
+                    </button>
+                </div>
+                <div id="promo-link-result" class="form-result" style="display:none;margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <!-- Create Activation Code -->
+        <div class="create-code-section animate-fade-in-up">
+            <h3 class="subsection-title">🔐 Create Activation Code</h3>
+            <div class="create-code-card">
+                <form id="create-code-form" class="create-code-form">
+                    <div class="form-row">
+                        <div class="form-group form-group-flex">
+                            <label for="new-code" class="form-label">Code</label>
+                            <input type="text" id="new-code" class="form-input" placeholder="e.g., STARTER-2026" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="code-plan-tier" class="form-label">Plan Tier</label>
+                            <select id="code-plan-tier" class="form-input form-select" required>
+                                <option value="">Select Plan</option>
+                                <option value="1">⚡ Starter (৳199)</option>
+                                <option value="2">🔥 Business (৳499)</option>
+                                <option value="3">💎 Agency (৳1499)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">➕ Create Code</button>
+                    </div>
+                </form>
+                <div id="create-code-result" class="form-result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Existing Codes -->
+        <div class="codes-section animate-fade-in-up">
+            <h3 class="subsection-title">🔑 Activation Codes</h3>
+            <div class="table-wrapper">
+                <table class="data-table" id="codes-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Plan</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for code in codes %}
+                        <tr class="{% if code.is_used %}row-used{% endif %}">
+                            <td><code class="code-display">{{ code.code }}</code></td>
+                            <td>
+                                {% if code.plan_tier == 1 %}⚡ Starter
+                                {% elif code.plan_tier == 2 %}🔥 Business
+                                {% elif code.plan_tier == 3 %}💎 Agency
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if code.is_used %}
+                                <span class="status-badge status-used">Used</span>
+                                {% else %}
+                                <span class="status-badge status-available">Available</span>
+                                {% endif %}
+                            </td>
+                            <td class="td-date">{{ code.created_at[:16] if code.created_at else 'N/A' }}</td>
+                            <td>
+                                <button class="btn btn-danger btn-xs" onclick="deleteCode({{ code.id }})">🗑️</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not codes %}
+                        <tr><td colspan="5" class="empty-row">No activation codes yet. Create one above!</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Active Plans -->
+        <div class="active-plans-section animate-fade-in-up">
+            <h3 class="subsection-title">🟢 Active Plans</h3>
+            {% if active_plans %}
+            <div class="plans-management-grid">
+                {% for plan in active_plans %}
+                <div class="plan-mgmt-card" style="border-left: 4px solid {{ plan.plan_info.color }}">
+                    <div class="plan-mgmt-header">
+                        <div class="plan-mgmt-title">
+                            <span class="plan-mgmt-emoji">{{ plan.plan_info.emoji }}</span>
+                            <div>
+                                <div class="plan-mgmt-name">{{ plan.plan_name }}</div>
+                                <div class="plan-mgmt-label">{{ plan.user_label if plan.user_label else 'No label' }}</div>
+                            </div>
+                        </div>
+                        <div class="plan-mgmt-days">
+                            <span class="days-count" style="color: {{ plan.plan_info.color }}">{{ plan.days_remaining }}</span>
+                            <span class="days-label">days left</span>
+                        </div>
+                    </div>
+                    <div class="plan-mgmt-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ (plan.days_remaining / 30) * 100 }}%; background: {{ plan.plan_info.gradient }}"></div>
+                        </div>
+                    </div>
+                    <div class="plan-mgmt-meta">
+                        <span>🔑 <code>{{ plan.activation_code }}</code></span>
+                        <span>📅 Expires: {{ plan.expires_at[:10] if plan.expires_at else 'N/A' }}</span>
+                    </div>
+                    <div class="plan-mgmt-actions">
+                        <button class="btn btn-warning btn-xs" onclick="deactivatePlan({{ plan.id }})">⏸️ Deactivate</button>
+                        <button class="btn btn-danger btn-xs" onclick="deletePlan({{ plan.id }})">🗑️ Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <p>No active plans. Create codes and activate plans to see them here.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section animate-fade-in-up">
+            <h3 class="subsection-title">📋 Recent Activity</h3>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Plan</th>
+                            <th>Code</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for act in stats.recent_activity %}
+                        <tr>
+                            <td>
+                                {% if act.action == 'ACTIVATED' %}
+                                <span class="activity-badge activity-activated">✅ Activated</span>
+                                {% elif act.action == 'DEACTIVATED' %}
+                                <span class="activity-badge activity-deactivated">⏸️ Deactivated</span>
+                                {% elif act.action == 'DELETED' %}
+                                <span class="activity-badge activity-deleted">🗑️ Deleted</span>
+                                {% else %}
+                                <span class="activity-badge">{{ act.action }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ act.plan_name }} (Tier {{ act.plan_tier }})</td>
+                            <td><code>{{ act.activation_code }}</code></td>
+                            <td class="td-date">{{ act.timestamp[:16] if act.timestamp else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% if not stats.recent_activity %}
+                        <tr><td colspan="4" class="empty-row">No activity yet.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Auto-refresh indicator -->
+        <div class="auto-refresh-indicator">
+            <span class="pulse-dot"></span>
+            <span>Auto-refreshing every 30s</span>
+            <span class="last-update" id="last-update">Last: {{ stats.last_updated[:19] if stats.last_updated else 'N/A' }}</span>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{
+    "name": "VidCover Tools",
+    "short_name": "VidCover",
+    "description": "Premium subscription-based video cover & thumbnail tools",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0f",
+    "theme_color": "#7c3aed",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "/static/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["utilities", "productivity"],
+    "lang": "en"
+}
